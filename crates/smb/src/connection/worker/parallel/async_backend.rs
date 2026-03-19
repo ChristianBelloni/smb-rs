@@ -17,6 +17,15 @@ pub struct AsyncBackend {
 }
 
 impl AsyncBackend {
+    fn is_io_error_unrecoverable(io_error: &std::io::Error) -> bool {
+        matches!(
+            io_error.kind(),
+            std::io::ErrorKind::ConnectionAborted
+                | std::io::ErrorKind::ConnectionReset
+                | std::io::ErrorKind::ConnectionRefused
+        )
+    }
+
     /// Internal message loop handler.
     async fn loop_receive(
         self: Arc<Self>,
@@ -32,6 +41,13 @@ impl AsyncBackend {
             {
                 Ok(_) => {}
                 Err(Error::TransportError(TransportError::NotConnected)) => {
+                    log::error!("Connection was force-closed by the server.");
+                    self_ref.token.cancel();
+                    break;
+                }
+                Err(Error::TransportError(TransportError::IoError(io_error)))
+                    if Self::is_io_error_unrecoverable(&io_error) =>
+                {
                     log::error!("Connection was force-closed by the server.");
                     self_ref.token.cancel();
                     break;
@@ -69,6 +85,13 @@ impl AsyncBackend {
             {
                 Ok(_) => {}
                 Err(Error::TransportError(TransportError::NotConnected)) => {
+                    log::error!("Connection was force-closed by the server.");
+                    self_ref.token.cancel();
+                    break;
+                }
+                Err(Error::TransportError(TransportError::IoError(io_error)))
+                    if Self::is_io_error_unrecoverable(&io_error) =>
+                {
                     log::error!("Connection was force-closed by the server.");
                     self_ref.token.cancel();
                     break;
