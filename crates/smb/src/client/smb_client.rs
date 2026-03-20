@@ -560,6 +560,10 @@ impl Client {
                 .unwrap()
                 .remove(&sc.session.conn_info.server_address.ip())
             {
+                log::warn!(
+                    "removed connection {}",
+                    sc.session.conn_info.server_address.ip()
+                );
                 _ = removed.connection.close().await;
             }
             return Err(Error::NotFound(format!(
