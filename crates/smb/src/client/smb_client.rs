@@ -562,7 +562,10 @@ impl Client {
             {
                 _ = removed.connection.close().await;
             }
-            return Err(Error::ConnectionStopped);
+            return Err(Error::NotFound(format!(
+                "No connected share found for path: {path} with ip {}",
+                current_address
+            )));
         }
 
         f(sc)
