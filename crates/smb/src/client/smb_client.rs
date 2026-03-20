@@ -549,6 +549,7 @@ impl Client {
         if TransportUtils::parse_socket_address(path.server())?
             != sc.session.conn_info.server_address
         {
+            log::warn!("[REMOVEME] stored ip address for given uncpath changed");
             self.connections
                 .write()
                 .await
