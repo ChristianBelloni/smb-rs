@@ -553,11 +553,15 @@ impl Client {
                 current_address,
                 sc.session.conn_info.server_address.ip()
             );
-            self.connections
+            if let Some(removed) = self
+                .connections
                 .write()
                 .await
                 .unwrap()
-                .remove(&sc.session.conn_info.server_address.ip());
+                .remove(&sc.session.conn_info.server_address.ip())
+            {
+                _ = removed.connection.close().await;
+            }
             return Err(Error::ConnectionStopped);
         }
 
