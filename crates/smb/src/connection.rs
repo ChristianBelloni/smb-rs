@@ -516,7 +516,10 @@ impl Connection {
         let session = Session::create(
             identity,
             &self.handler,
-            self.handler.conn_info.get().unwrap(),
+            self.handler
+                .conn_info
+                .get()
+                .ok_or_else(|| crate::Error::ConnectionStopped)?,
         )
         .await?;
         let session_handler = session.handler.weak();
