@@ -546,12 +546,12 @@ impl Client {
             Error::NotFound(format!("No connected share found for path: {path}",))
         })?;
 
-        let current_address = TransportUtils::parse_socket_address(path.server())?;
-        if current_address != sc.session.conn_info.server_address {
+        let current_address = TransportUtils::parse_socket_address(path.server())?.ip();
+        if current_address != sc.session.conn_info.server_address.ip() {
             log::warn!(
                 "[REMOVEME] stored ip address for given uncpath changed {} {}",
                 current_address,
-                sc.session.conn_info.server_address
+                sc.session.conn_info.server_address.ip()
             );
             self.connections
                 .write()
